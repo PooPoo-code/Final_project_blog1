@@ -1,0 +1,67 @@
+{% extends "blog/base.html" %}
+
+{% block content %}
+<article class="card mb-4">
+  <div class="card-header">
+    <h2 class="card-title">{{ post.title }}</h2>
+    <small class="text-muted">
+      Posted by <a href="{% url 'user-profile' post.author.username %}">{{ post.author }}</a> on {{ post.date_posted|date:"F d, Y" }}
+    </small>
+  </div>
+
+  <div class="card-body">
+    {% if post.image %}
+    <div class="post-image mb-4">
+      <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-fluid rounded">
+    </div>
+    {% endif %}
+
+    <div class="post-content">
+      {{ post.content|linebreaks }}
+    </div>
+
+    {% if post.author == user %}
+    <div class="mt-4">
+      <a href="{% url 'post-update' post.pk %}" class="btn btn-outline-secondary btn-sm">Edit</a>
+      <a href="{% url 'post-delete' post.pk %}" class="btn btn-outline-danger btn-sm">Delete</a>
+    </div>
+    {% endif %}
+  </div>
+</article>
+
+<div class="card mb-4">
+  <div class="card-header">
+    <h3>Comments</h3>
+  </div>
+  <div class="card-body">
+    <form method="POST" action="{% url 'add_comment' post.pk %}">
+      {% csrf_token %}
+      <div class="form-group mb-3">
+        <label for="id_content">Add a comment:</label>
+        <textarea class="form-control" id="id_content" name="content" rows="3" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary mb-4">Submit Comment</button>
+    </form>
+
+    {% if post.comments.all %}
+      {% for comment in post.comments.all %}
+      <div class="comment mb-3 pb-3 border-bottom" id="comment-{{ comment.id }}">
+        <strong><a href="{% url 'user-profile' comment.author.username %}">{{ comment.author }}</a></strong>
+        <small class="text-muted">{{ comment.created_date|date:"F d, Y" }}</small>
+
+        {% if comment.author == user %}
+        <div class="float-end">
+          <a href="{% url 'edit_comment' comment.pk %}" class="btn btn-sm btn-outline-secondary">Edit</a>
+          <a href="{% url 'delete_comment' comment.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+        </div>
+        {% endif %}
+
+        <p>{{ comment.content|linebreaks }}</p>
+      </div>
+      {% endfor %}
+    {% else %}
+      <p>No comments yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

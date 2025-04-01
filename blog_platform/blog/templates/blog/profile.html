@@ -1,0 +1,65 @@
+{% extends "blog/base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3>{{ user.username }}</h3>
+                </div>
+                <div class="card-body text-center">
+                    {% if user.profile.profile_pic %}
+                        <img src="{{ user.profile.profile_pic.url }}" alt="Profile Picture" class="rounded-circle img-fluid mb-3" style="max-width: 150px;">
+                    {% else %}
+                        <img src="https://via.placeholder.com/150" alt="Default Profile" class="rounded-circle img-fluid mb-3">
+                    {% endif %}
+                    
+                    <p class="text-muted">{{ user.email }}</p>
+                    <p>{{ user.profile.bio }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3>Update Profile</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="form-group mb-3">
+                            <label for="{{ profile_form.bio.id_for_label }}">Bio</label>
+                            {{ profile_form.bio.errors }}
+                            <textarea class="form-control" id="{{ profile_form.bio.id_for_label }}" name="{{ profile_form.bio.html_name }}" rows="3">{% if profile_form.bio.value %}{{ profile_form.bio.value }}{% endif %}</textarea>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="{{ profile_form.profile_pic.id_for_label }}">Profile Picture</label>
+                            {{ profile_form.profile_pic.errors }}
+                            <input type="file" class="form-control" id="{{ profile_form.profile_pic.id_for_label }}" name="{{ profile_form.profile_pic.html_name }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update</button>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h3>Your Posts</h3>
+                </div>
+                <div class="card-body">
+                    {% for post in user.post_set.all %}
+                        <div class="mb-3 pb-2 border-bottom">
+                            <h4><a href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h4>
+                            <p class="text-muted small">{{ post.date_posted|date:"F d, Y" }}</p>
+                        </div>
+                    {% empty %}
+                        <p>You haven't created any posts yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
